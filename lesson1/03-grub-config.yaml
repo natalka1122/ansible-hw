@@ -1,0 +1,31 @@
+---
+- name: Change network interface names
+  hosts: all
+  become: yes
+  gather_facts: no
+  vars:
+    grub_filename: /etc/default/grub
+    grub_mkconfig: /sbin/grub2-mkconfig
+    variables:
+      - name: net.ifnames
+        value: 0
+      - name: biosdevname
+        value: 0
+
+
+  tasks:
+    - name: Add or replace variables in grub file
+    # Found here: https://stackoverflow.com/questions/39795873/ansible-lineinfile-modify-a-line
+      lineinfile:
+        path: "{{ grub_filename }}"
+        backrefs: yes
+        regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ item.name | regex_escape }}=).)*)(?:[" ]{{ item.name | regex_escape }}=\S+)?(.*")$'
+        line: '\1 {{ item.name }}={{ item.value }}\2'
+      loop: "{{ variables }}"
+      register: new_grub
+
+    - name: Apply config if changed
+      command: "{{ grub_mkconfig }} -o {{ grub_filename }}"
+      when: new_grub.changed
+
+      

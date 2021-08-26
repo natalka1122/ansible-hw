@@ -1,0 +1,33 @@
+---
+- name: Install and init Apache web-server
+  hosts: all
+  become: yes
+  gather_facts: no
+  vars:
+    apache_name: httpd
+
+  tasks:
+    - name: "Install {{ apache_name }}"
+      yum:
+        name: "{{ apache_name }}"
+        state: present
+
+    - name: "Start service {{ apache_name }}"
+      service:
+        name: "{{ apache_name }}"
+        state: started
+        enabled: yes
+    - name: Create sample web-page
+      copy:
+        dest: /var/www/html/index.html
+        content: "Welcome to my web server"
+
+    - name: Enable firewalld
+      service: name=firewalld state=started enabled=yes
+
+    - name: Permit traffic for http service
+      firewalld:
+        port: 80/tcp
+        permanent: yes
+        state: enabled
+        immediate: yes
