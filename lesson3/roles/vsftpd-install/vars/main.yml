@@ -1,0 +1,4 @@
+---
+ftp_name: vsftpd
+vsftpd_conf: /etc/vsftpd/vsftpd.conf
+selinux_context_name: ftpd_anon_write

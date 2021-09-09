@@ -1,0 +1,6 @@
+---
+- name: Reload FTP service
+  service:
+    name: "{{ ftp_name }}"
+    state: restarted
+  become: yes

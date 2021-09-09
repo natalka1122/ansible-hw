@@ -1,0 +1,7 @@
+---
+apache_name: httpd
+apache_user: apache
+apache_log: /var/log/httpd
+apache_html: /var/www/html
+apache_port: 80
+

@@ -1,0 +1,5 @@
+---
+- name: Install and init Apache web-server
+  hosts: all
+  roles:
+    - apache-install

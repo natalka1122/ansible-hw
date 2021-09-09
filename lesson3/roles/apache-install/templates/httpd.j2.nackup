@@ -1,0 +1,47 @@
+# Apache httpd v2.4 minimal configuration
+# This can be reduced further if you remove the accees log and mod_log_config
+#ServerRoot "/usr/httpd"
+ServerName {{ ansible_facts.fqdn }}
+
+# Minimum modules needed
+LoadModule mpm_event_module modules/mod_mpm_event.so
+LoadModule log_config_module modules/mod_log_config.so
+LoadModule mime_module modules/mod_mime.so
+LoadModule dir_module modules/mod_dir.so
+LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule unixd_module modules/mod_unixd.so
+
+TypesConfig /etc/mime.types
+
+PidFile /var/run/httpd.pid
+
+# Comment this out if running httpd as a non root user
+User {{ apache_user }}
+Group {{ apache_user }}
+
+# Port to Listen on
+Listen *:{{ html_port }}
+
+# In a basic setup httpd can only serve files from its document root
+DocumentRoot "{{ html_dir }}"
+
+# Default file to serve
+DirectoryIndex index.html
+
+# Errors go to their own log
+ErrorLog {{ apache_log }}/error_log
+
+# Access log
+LogFormat "%h %l %u %t \"%r\" %>s %b" common
+CustomLog logs/access_log common
+
+# Never change this block
+<Directory />
+  AllowOverride None
+  Require all denied
+</Directory>
+
+# Allow documents to be served from the DocumentRoot
+<Directory "{{ html_dir }}">
+  Require all granted
+</Directory>

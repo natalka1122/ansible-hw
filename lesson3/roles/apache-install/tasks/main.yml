@@ -1,0 +1,57 @@
+---
+- block:
+  - name: Install {{ apache_name }}
+    yum:
+      name: "{{ apache_name }}"
+      state: present
+
+  - name: Create user {{ apache_user }}
+    user:
+      name: "{{ apache_user }}"
+      shell: /sbin/nologin
+
+  - name: Create a directory for html file
+    file:
+      path: "{{ apache_html }}"
+      state: directory
+
+  - name: Create a directory for logs
+    file:
+      path: "{{ apache_log }}"
+      state: directory
+
+  - name: Create index.html file
+    template:
+      src: index.j2
+      dest: "{{ apache_html }}/index.html"
+    # Don't need to, but for demostrative purpose
+    notify:
+      - Restart apache
+
+  - name: Create {{ apache_name }} config
+    template:
+      src: httpd.j2
+      dest: /etc/httpd/conf/httpd.conf
+    notify:
+      - Restart apache
+
+  - name: Enable and start service {{ apache_name }}
+    service:
+      name: "{{ apache_name }}"
+      state: started
+      enabled: yes
+
+  - name: Enable firewalld
+    service:
+      name: firewalld 
+      state: started
+      enabled: yes
+
+  - name: Permit traffic for http service
+    firewalld:
+      port: "{{ apache_port }}/tcp"
+      permanent: yes
+      state: enabled
+      immediate: yes
+
+  become: yes
