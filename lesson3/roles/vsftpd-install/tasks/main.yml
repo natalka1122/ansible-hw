@@ -12,20 +12,32 @@
 #      state: yes
 #      persistent: yes
 
-  - name: Check SELinux context
+  - name: Check SELinux context ftpd_full_access
     command:
-      cmd: "getsebool {{ selinux_context_name }}"
-    register: selinux_context
+      cmd: "getsebool {{ selinux_ftpd_full_access }}"
+    register: selinux_context_ftpd_full_access
     changed_when: false
 
-  - name: Change SElinux context
+  - name: Change SElinux context ftpd_full_access 
     command:
-      cmd: "setsebool -P {{ selinux_context_name }} on"
-    when: selinux_context.stdout.find('off') != -1  
+      cmd: "setsebool -P {{ selinux_ftpd_full_access }} on"
+    when: selinux_context_ftpd_full_access.stdout.find('off') != -1  
+
+  - name: Check SELinux context ftpd_anon_write
+    command:
+      cmd: "getsebool {{ selinux_ftpd_anon_write }}"
+    register: selinux_context_ftpd_anon_write 
+    changed_when: false
+
+  - name: Change SElinux context ftpd_anon_write 
+    command:
+      cmd: "setsebool -P {{ selinux_ftpd_anon_write }} on"
+    when: selinux_context_ftpd_anon_write .stdout.find('off') != -1
+
 
   - name: Create root folder
     file:
-      path: /var/ftp/pub
+      path: "{{ anon_root }}"
       state: directory
       mode: "555"
       owner: ftp
@@ -33,7 +45,7 @@
 
   - name: Create upload folder
     file:
-      path: /var/ftp/pub/upload
+      path: "{{ anon_root }}/{{ anon_write_subfolder }}"
       state: directory
       mode: "777"
       owner: ftp
@@ -53,21 +65,12 @@
 
   - name: Permit traffic for ftp service
     firewalld:
-#      service: "ftp" 
       port: "{{ item }}/tcp"
       permanent: yes
       state: enabled
       immediate: yes
     loop:
       - "20-21"
-      - "30000-50000"
-
-#  - name: Permit traffic for ftp service
-#    firewalld:
-#      port: "30000-50000/tcp"
-#      permanent: yes
-#      state: enabled
-#      immediate: yes
-
+      - "{{ pasv_min_port }}-{{ pasv_max_port }}"
 
   become: yes

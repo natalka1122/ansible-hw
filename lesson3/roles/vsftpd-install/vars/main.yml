@@ -1,4 +1,9 @@
 ---
 ftp_name: vsftpd
+pasv_min_port: 40000
+pasv_max_port: 50000
 vsftpd_conf: /etc/vsftpd/vsftpd.conf
-selinux_context_name: ftpd_anon_write
+anon_root: /var/ftp/pub
+anon_write_subfolder: upload
+selinux_ftpd_anon_write: ftpd_anon_write
+selinux_ftpd_full_access: ftpd_full_access
